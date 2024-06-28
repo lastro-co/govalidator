@@ -109,8 +109,27 @@ func (tm *customTypeTagMap) Set(name string, ctv CustomTypeValidator) {
 // `type UUID [16]byte` (this would be handled as an array of bytes).
 var CustomTypeTagMap = &customTypeTagMap{validators: make(map[string]CustomTypeValidator)}
 
+type defaultTypeTagMap struct {
+	validators map[string]Validator
+
+	sync.RWMutex
+}
+
+func (tm *defaultTypeTagMap) Get(name string) (Validator, bool) {
+	tm.RLock()
+	defer tm.RUnlock()
+	v, ok := tm.validators[name]
+	return v, ok
+}
+
+func (tm *defaultTypeTagMap) Set(name string, ctv Validator) {
+	tm.Lock()
+	defer tm.Unlock()
+	tm.validators[name] = ctv
+}
+
 // TagMap is a map of functions, that can be used as tags for ValidateStruct function.
-var TagMap = map[string]Validator{
+var TagMap = &defaultTypeTagMap{validators: map[string]Validator{
 	"email":              IsEmail,
 	"url":                IsURL,
 	"dialstring":         IsDialString,
@@ -166,7 +185,7 @@ var TagMap = map[string]Validator{
 	"ISO4217":            IsISO4217,
 	"IMEI":               IsIMEI,
 	"ulid":               IsULID,
-}
+}}
 
 // ISO3166Entry stores country codes
 type ISO3166Entry struct {
@@ -177,7 +196,7 @@ type ISO3166Entry struct {
 	Numeric          string
 }
 
-//ISO3166List based on https://www.iso.org/obp/ui/#search/code/ Code Type "Officially Assigned Codes"
+// ISO3166List based on https://www.iso.org/obp/ui/#search/code/ Code Type "Officially Assigned Codes"
 var ISO3166List = []ISO3166Entry{
 	{"Afghanistan", "Afghanistan (l')", "AF", "AFG", "004"},
 	{"Albania", "Albanie (l')", "AL", "ALB", "008"},
@@ -467,7 +486,7 @@ type ISO693Entry struct {
 	English     string
 }
 
-//ISO693List based on http://data.okfn.org/data/core/language-codes/r/language-codes-3b2.json
+// ISO693List based on http://data.okfn.org/data/core/language-codes/r/language-codes-3b2.json
 var ISO693List = []ISO693Entry{
 	{Alpha3bCode: "aar", Alpha2Code: "aa", English: "Afar"},
 	{Alpha3bCode: "abk", Alpha2Code: "ab", English: "Abkhazian"},

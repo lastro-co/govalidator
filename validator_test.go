@@ -3130,9 +3130,9 @@ func TestValidateStruct(t *testing.T) {
 		}
 	}
 
-	TagMap["d_k"] = Validator(func(str string) bool {
+	TagMap.Set("d_k", Validator(func(str string) bool {
 		return str == "d_k"
-	})
+	}))
 	result, err := ValidateStruct(PrivateStruct{"d_k", 0, []int{1, 2}, []string{"hi", "super"}, [2]Address{{"Street", "123456"},
 		{"Street", "123456"}}, Address{"Street", "123456"}, map[string]Address{"address": {"Street", "123456"}}})
 	if !result {
@@ -3429,9 +3429,9 @@ func ExampleValidateStruct() {
 	post := &Post{"My Example Post", "duck", "123.234.54.3"}
 
 	//Add your own struct validation tags
-	TagMap["duck"] = Validator(func(str string) bool {
+	TagMap.Set("duck", Validator(func(str string) bool {
 		return str == "duck"
-	})
+	}))
 
 	result, err := ValidateStruct(post)
 	if err != nil {
